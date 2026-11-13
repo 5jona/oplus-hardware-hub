@@ -1,0 +1,6 @@
+id=oplus_smart_charge
+name=OnePlus Smart FastCharge & Thermal Governor
+version=v1.0.0
+versionCode=100
+author=pochita
+description=Thermal governor and fast charge unlocker for OnePlus devices. Keeps fast charging running at peak throughput under cooling, with automatic thermal tripwire and KernelSU WebUI telemetry dashboard.

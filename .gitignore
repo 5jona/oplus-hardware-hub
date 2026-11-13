@@ -1,0 +1,15 @@
+# Packaging output
+out/
+*.zip
+*.tar.gz
+
+# Cargo build artifacts
+target/
+governor/target/
+bin/charge_governor
+
+# Temporary and editor files
+*.tmp
+*~
+*.swp
+.DS_Store

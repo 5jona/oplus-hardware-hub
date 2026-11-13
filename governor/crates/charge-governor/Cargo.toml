@@ -1,0 +1,19 @@
+[package]
+name = "charge-governor"
+description = "Native background supervisor daemon and CLI telemetry tool for OnePlus devices"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "charge_governor"
+path = "src/main.rs"
+
+[dependencies]
+governor-core.workspace = true
+
+[lints]
+workspace = true

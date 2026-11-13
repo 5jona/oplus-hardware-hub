@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Smart FastCharge Governor</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <div class="brand-title">Smart FastCharge Governor</div>
+      <div class="brand-sub">OnePlus Hardware Thermal Control</div>
+    </div>
+    <div class="status-pill">
+      <div id="dot-state" class="status-dot dot-idle"></div>
+      <span id="badge-state" class="badge badge-secondary">Connecting</span>
+    </div>
+  </header>
+
+  <!-- Hero Power Card -->
+  <div class="card hero-card">
+    <div class="hero-label">Delivered Power</div>
+    <div class="hero-value" id="val-power">0.0 W</div>
+    <div class="brand-sub" id="sub-power">Dual-Cell Bus Equivalent</div>
+  </div>
+
+  <!-- Telemetry Metrics Grid -->
+  <div class="grid-metrics">
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>Battery Level</span>
+        <span class="badge badge-secondary" id="badge-charge">State</span>
+      </div>
+      <div class="metric-val" id="val-level">0%</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>Temperature</span>
+        <span class="badge badge-success" id="badge-temp">Optimal</span>
+      </div>
+      <div class="metric-val" id="val-temp">0.0 °C</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>Charging Current</span>
+      </div>
+      <div class="metric-val" id="val-current">0 mA</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>Pack Voltage</span>
+      </div>
+      <div class="metric-val" id="val-vbat">0.00 V</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>USB Bus Voltage</span>
+      </div>
+      <div class="metric-val" id="val-vusb">0.00 V</div>
+    </div>
+
+    <div class="metric-box">
+      <div class="metric-title">
+        <span>MMS Throttle Gear</span>
+      </div>
+      <div class="metric-val" id="val-cooldown">Level 0</div>
+    </div>
+  </div>
+
+  <!-- Governor Configuration Card -->
+  <div class="card">
+    <div class="card-title">Governor Parameters</div>
+
+    <div class="control-item">
+      <div class="control-text">
+        <div class="label">Enable Thermal Governor</div>
+        <div class="desc">Active lock of 0 gear during charging when thermally safe</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="sw-governor" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="control-item">
+      <div class="control-text">
+        <div class="label">Screen-On Fast Charging</div>
+        <div class="desc">Bypass OEM screen-on charging current throttling</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="sw-screenon" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="range-group">
+      <div class="range-header">
+        <span>Max Safety Temperature</span>
+        <span class="val-highlight" id="label-maxtemp">42.0 °C</span>
+      </div>
+      <input type="range" id="slider-maxtemp" min="36.0" max="45.0" step="0.5" value="42.0" />
+    </div>
+
+    <div class="range-group">
+      <div class="range-header">
+        <span>Hysteresis Recovery Temperature</span>
+        <span class="val-highlight" id="label-rectemp">38.0 °C</span>
+      </div>
+      <input type="range" id="slider-rectemp" min="34.0" max="42.0" step="0.5" value="38.0" />
+    </div>
+
+    <div class="control-item">
+      <div class="control-text">
+        <div class="label">Active Enforcement Interval</div>
+        <div class="desc">Frequency of cool_down maintenance when plugged in</div>
+      </div>
+      <select id="sel-interval">
+        <option value="250">250 ms (Ultra-fast)</option>
+        <option value="500" selected>500 ms (Balanced)</option>
+        <option value="1000">1000 ms (Eco)</option>
+      </select>
+    </div>
+
+    <button id="btn-save" class="btn-primary">Save & Apply Settings</button>
+  </div>
+
+  <!-- Hardware Information Card -->
+  <div class="card">
+    <div class="card-title">Hardware Telemetry</div>
+    <table class="info-table">
+      <tbody>
+        <tr>
+          <td>Device Rated Capability</td>
+          <td id="val-device-pwr">67 W</td>
+        </tr>
+        <tr>
+          <td>Adapter Capability</td>
+          <td id="val-adapter-pwr">100 W</td>
+        </tr>
+        <tr>
+          <td>Active Overrides Counter</td>
+          <td id="val-overrides">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="js/bridge.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
