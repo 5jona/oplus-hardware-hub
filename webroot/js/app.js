@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const { Bridge, Config } = window.SmartCharge;
+  const { Bridge, Config } = window.OHH;
 
   let activeConfig = { ...Config.DEFAULT_CONFIG };
   let pollTimer = null;

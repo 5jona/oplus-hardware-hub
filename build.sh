@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# OnePlus Smart FastCharge & Thermal Governor - Packaging Script
+# OPlus Hardware Hub - Packaging Script
 # Compiles the aarch64 Android daemon and packages module components into a flashable ZIP.
 #
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GOVERNOR_DIR="${SCRIPT_DIR}/governor"
+DAEMON_DIR="${SCRIPT_DIR}/daemon"
 DAEMON_TARGET_TRIPLE="aarch64-linux-android"
-DAEMON_BIN_SRC="${GOVERNOR_DIR}/target/${DAEMON_TARGET_TRIPLE}/release/charge_governor"
-DAEMON_BIN_DST="${SCRIPT_DIR}/bin/charge_governor"
+DAEMON_BIN_SRC="${DAEMON_DIR}/target/${DAEMON_TARGET_TRIPLE}/release/ohh"
+DAEMON_BIN_DST="${SCRIPT_DIR}/bin/ohh"
 OUTPUT_DIR="${SCRIPT_DIR}/out"
-PACKAGE_NAME="oplus-smart-charge.zip"
+PACKAGE_NAME="oplus-hardware-hub.zip"
 
-echo "[*] Compiling charge_governor (${DAEMON_TARGET_TRIPLE})..."
+echo "[*] Compiling ohh (${DAEMON_TARGET_TRIPLE})..."
 (
-    cd "${GOVERNOR_DIR}"
+    cd "${DAEMON_DIR}"
     cargo build --release --target "${DAEMON_TARGET_TRIPLE}"
 )
 
@@ -47,7 +47,7 @@ files_to_pack = [
     ("post-fs-data.sh", 0o755),
     ("customize.sh", 0o755),
     ("uninstall.sh", 0o755),
-    ("bin/charge_governor", 0o755),
+    ("bin/ohh", 0o755),
 ]
 
 def write_with_mode(zf, src_path, arcname, mode):

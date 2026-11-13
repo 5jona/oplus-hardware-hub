@@ -29,7 +29,7 @@ impl Default for GovernorConfig {
             screen_on_full_speed: true,
             active_interval_ms: 500,
             idle_interval_ms: 3000,
-            config_path: PathBuf::from("/data/adb/modules/oplus_smart_charge/config.conf"),
+            config_path: PathBuf::from("/data/adb/modules/oplus_hardware_hub/config.conf"),
         }
     }
 }

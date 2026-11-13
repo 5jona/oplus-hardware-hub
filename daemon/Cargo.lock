@@ -3,12 +3,12 @@
 version = 4
 
 [[package]]
-name = "charge-governor"
+name = "ohh"
 version = "1.0.0"
 dependencies = [
- "governor-core",
+ "ohh-core",
 ]
 
 [[package]]
-name = "governor-core"
+name = "ohh-core"
 version = "1.0.0"

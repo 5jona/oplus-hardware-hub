@@ -1,7 +1,7 @@
 use crate::battery::{BatterySubsystem, BatteryTelemetry};
 use crate::config::GovernorConfig;
 
-/// Operating states of the smart charge thermal governor.
+/// Operating states of the thermal governor.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum GovernorState {
     /// Device is discharging or not connected to a validated charger.

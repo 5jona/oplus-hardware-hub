@@ -5,8 +5,8 @@ out/
 
 # Cargo build artifacts
 target/
-governor/target/
-bin/charge_governor
+daemon/target/
+bin/ohh
 
 # Temporary and editor files
 *.tmp

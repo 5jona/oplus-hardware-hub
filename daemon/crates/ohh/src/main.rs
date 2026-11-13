@@ -1,12 +1,12 @@
-use governor_core::{ChargeGovernor, GovernorConfig, GovernorState};
+use ohh_core::{ChargeGovernor, GovernorConfig, GovernorState};
 use std::env;
 use std::path::PathBuf;
 use std::thread;
 use std::time::{Duration, Instant};
 
 fn print_usage() {
-    println!("OnePlus Smart FastCharge & Thermal Governor");
-    println!("Usage: charge_governor [OPTIONS]");
+    println!("OPlus Hardware Hub");
+    println!("Usage: ohh [OPTIONS]");
     println!();
     println!("Options:");
     println!("  --config <path>   Specify configuration file path");
@@ -19,7 +19,7 @@ fn print_usage() {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mut config_path = PathBuf::from("/data/adb/modules/oplus_smart_charge/config.conf");
+    let mut config_path = PathBuf::from("/data/adb/modules/oplus_hardware_hub/config.conf");
     let mut mode_status = false;
     let mut mode_apply_once = false;
 
@@ -49,7 +49,7 @@ fn main() {
                 return;
             }
             "--version" | "-v" => {
-                println!("charge_governor v{}", env!("CARGO_PKG_VERSION"));
+                println!("ohh v{}", env!("CARGO_PKG_VERSION"));
                 return;
             }
             unknown => {

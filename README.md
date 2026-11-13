@@ -1,12 +1,12 @@
-# OnePlus Smart FastCharge & Thermal Governor
+# OPlus Hardware Hub
 
-A modular KernelSU extension for OnePlus devices running ColorOS or OxygenOS. Manages fast charging thermal throttling under active cooling to sustain peak wattage, featuring an automatic thermal tripwire and real-time KernelSU WebUI telemetry dashboard.
+A modular KernelSU extension for OnePlus devices running ColorOS or OxygenOS. Manages fast charging thermal throttling to sustain peak wattage under cooling, featuring an automatic thermal tripwire and real-time KernelSU WebUI telemetry dashboard.
 
 ## Architecture
 
-- **`governor/`**: Modern Rust 2024 workspace compiling an optimized native ARM64 daemon (`charge_governor`).
-  - `governor-core`: Platform-agnostic telemetry reader, MMS `cool_down` interface, hysteresis state machine, and error handling.
-  - `charge-governor`: Daemon supervisor and CLI status querying binary.
+- **`daemon/`**: Modern Rust 2024 workspace compiling an optimized native ARM64 binary (`ohh`).
+  - `ohh-core`: Platform-agnostic telemetry reader, MMS `cool_down` interface, hysteresis state machine, and error handling.
+  - `ohh`: Daemon supervisor and CLI status querying binary.
 - **`webroot/`**: Responsive telemetry dashboard embedded in KernelSU Manager via `window.ksu.exec`.
 - **`config.conf`**: Configurable temperature ceilings, recovery hysteresis points, and screen-on policy.
 
@@ -20,7 +20,7 @@ A modular KernelSU extension for OnePlus devices running ColorOS or OxygenOS. Ma
 ```bash
 ./build.sh
 ```
-The output package will be generated at `out/oplus-smart-charge.zip`.
+The output package will be generated at `out/oplus-hardware-hub.zip`.
 
 ### Live Testing & Hot Reloading (via ADB)
 ```bash

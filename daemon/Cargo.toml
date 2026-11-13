@@ -1,10 +1,10 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/governor-core",
-    "crates/charge-governor",
+    "crates/ohh-core",
+    "crates/ohh",
 ]
-default-members = ["crates/charge-governor"]
+default-members = ["crates/ohh"]
 
 [workspace.package]
 version = "1.0.0"
@@ -12,10 +12,10 @@ edition = "2024"
 rust-version = "1.89"
 license = "MIT OR Apache-2.0"
 authors = ["pochita"]
-repository = "https://github.com/pochita/oplus-smart-charge"
+repository = "https://github.com/5jona/oplus-hardware-hub"
 
 [workspace.dependencies]
-governor-core = { path = "crates/governor-core" }
+ohh-core = { path = "crates/ohh-core" }
 
 [workspace.lints.rust]
 unsafe_op_in_unsafe_fn = "deny"

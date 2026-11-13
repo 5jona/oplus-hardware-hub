@@ -1,6 +1,6 @@
 [package]
-name = "governor-core"
-description = "Core domain types, telemetry ingestion, and thermal state machine for OnePlus devices"
+name = "ohh-core"
+description = "Core telemetry readers, hysteresis controller, and MMS interface for OnePlus devices"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

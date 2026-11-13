@@ -5,7 +5,7 @@
 
 SKIPUNZIP=0
 
-ui_print "- Installing OnePlus Smart FastCharge & Thermal Governor..."
+ui_print "- Installing OPlus Hardware Hub..."
 
 # Verify architecture
 if [ "$ARCH" != "arm64" ]; then
@@ -19,7 +19,7 @@ if [ ! -d "/sys/class/oplus_chg/battery" ]; then
 fi
 
 ui_print "- Setting executable permissions..."
-set_perm "$MODPATH/bin/charge_governor" 0 0 0755
+set_perm "$MODPATH/bin/ohh" 0 0 0755
 set_perm "$MODPATH/service.sh" 0 0 0755
 set_perm "$MODPATH/post-fs-data.sh" 0 0 0755
 set_perm "$MODPATH/uninstall.sh" 0 0 0755

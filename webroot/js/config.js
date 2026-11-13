@@ -1,11 +1,11 @@
 (() => {
   "use strict";
 
-  window.SmartCharge = window.SmartCharge || {};
+  window.OHH = window.OHH || {};
 
-  const MODULE_PATH = "/data/adb/modules/oplus_smart_charge";
+  const MODULE_PATH = "/data/adb/modules/oplus_hardware_hub";
   const CONFIG_PATH = `${MODULE_PATH}/config.conf`;
-  const DAEMON_BIN = `${MODULE_PATH}/bin/charge_governor`;
+  const DAEMON_BIN = `${MODULE_PATH}/bin/ohh`;
 
   const DEFAULT_CONFIG = {
     governor_enabled: true,
@@ -17,7 +17,7 @@
   };
 
   async function loadConfig() {
-    const res = await window.SmartCharge.Bridge.ksuExec(`cat "${CONFIG_PATH}" 2>/dev/null`);
+    const res = await window.OHH.Bridge.ksuExec(`cat "${CONFIG_PATH}" 2>/dev/null`);
     if (res.errno !== 0 || !res.stdout.trim()) {
       return { ...DEFAULT_CONFIG };
     }
@@ -56,7 +56,7 @@
 
   async function saveConfig(cfg) {
     const content = [
-      "# Configuration for OnePlus Smart FastCharge & Thermal Governor",
+      "# Configuration for OPlus Hardware Hub",
       `governor_enabled=${cfg.governor_enabled ? 1 : 0}`,
       `max_allowed_temp=${cfg.max_allowed_temp.toFixed(1)}`,
       `recovery_temp=${cfg.recovery_temp.toFixed(1)}`,
@@ -66,12 +66,12 @@
     ].join("\n");
 
     const cmd = `cat <<'EOF' > "${CONFIG_PATH}"\n${content}\nEOF\nchmod 0644 "${CONFIG_PATH}"`;
-    return await window.SmartCharge.Bridge.ksuExec(cmd);
+    return await window.OHH.Bridge.ksuExec(cmd);
   }
 
   async function queryStatus() {
     const cmd = `"${DAEMON_BIN}" --config "${CONFIG_PATH}" --status 2>/dev/null`;
-    const res = await window.SmartCharge.Bridge.ksuExec(cmd);
+    const res = await window.OHH.Bridge.ksuExec(cmd);
     if (res.errno === 0 && res.stdout) {
       try {
         return JSON.parse(res.stdout);
@@ -82,7 +82,7 @@
     return null;
   }
 
-  window.SmartCharge.Config = {
+  window.OHH.Config = {
     MODULE_PATH,
     CONFIG_PATH,
     DAEMON_BIN,

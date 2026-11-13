@@ -1,12 +1,12 @@
 #!/system/bin/sh
 #
 # Late-start service executed by KernelSU after boot completion.
-# Supervises the charge_governor daemon lifecycle.
+# Supervises the ohh daemon lifecycle.
 #
 
 MODDIR="${0%/*}"
-LOG_TAG="OplusSmartCharge"
-DAEMON_BIN="$MODDIR/bin/charge_governor"
+LOG_TAG="OHH"
+DAEMON_BIN="$MODDIR/bin/ohh"
 CONFIG_FILE="$MODDIR/config.conf"
 
 log_info() {
@@ -18,13 +18,13 @@ until [ "$(getprop sys.boot_completed)" = "1" ]; do
     sleep 2
 done
 
-log_info "Boot completed. Initializing OnePlus Smart FastCharge Governor..."
+log_info "Boot completed. Initializing OPlus Hardware Hub..."
 
 # Terminate any stale instances
-pkill -9 -x "charge_governor" 2>/dev/null || true
+pkill -9 -x "ohh" 2>/dev/null || true
 
 if [ -x "$DAEMON_BIN" ]; then
-    log_info "Starting charge_governor supervisor (config: $CONFIG_FILE)..."
+    log_info "Starting ohh supervisor (config: $CONFIG_FILE)..."
     while true; do
         if [ -f "$MODDIR/remove" ]; then
             log_info "Module marked for removal. Exiting supervisor."

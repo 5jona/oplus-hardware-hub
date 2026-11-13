@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  window.SmartCharge = window.SmartCharge || {};
+  window.OHH = window.OHH || {};
 
   function hasKsu() {
     return (
@@ -15,7 +15,7 @@
   function ksuExec(cmd, options = {}) {
     return new Promise((resolve) => {
       if (hasKsu()) {
-        const cbName = `__charge_ksu_cb_${Date.now()}_${++ksuCbCounter}`;
+        const cbName = `__ohh_ksu_cb_${Date.now()}_${++ksuCbCounter}`;
 
         const timer = setTimeout(() => {
           if (window[cbName]) {
@@ -70,7 +70,7 @@
     });
   }
 
-  window.SmartCharge.Bridge = {
+  window.OHH.Bridge = {
     hasKsu,
     ksuExec,
   };
