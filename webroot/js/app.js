@@ -92,9 +92,20 @@
     $("val-adapter-pwr").textContent =
       status.adapter_max_power_w > 0 ? `${status.adapter_max_power_w} W` : "Negotiating";
     $("val-overrides").textContent = status.consecutive_overrides;
+    if ($("val-chargelimit-status") && typeof status.charge_limit_enabled !== "undefined") {
+      $("val-chargelimit-status").textContent = status.charge_limit_enabled
+        ? `${status.charge_limit_level}% (Active)`
+        : "Disabled";
+    }
   }
 
   function bindInputEvents() {
+    const swChargeLimit = $("sw-chargelimit");
+    const sliderChargeLimit = $("slider-chargelimit");
+    const labelChargeLimit = $("label-chargelimit");
+    const groupChargeLimit = $("group-chargelimit");
+    const presetPills = document.querySelectorAll(".preset-pill");
+
     const swGovernor = $("sw-governor");
     const swScreenOn = $("sw-screenon");
     const sliderMaxTemp = $("slider-maxtemp");
@@ -102,6 +113,48 @@
     const valMaxTemp = $("label-maxtemp");
     const valRecTemp = $("label-rectemp");
     const btnSave = $("btn-save");
+
+    function syncPills(level) {
+      presetPills.forEach((p) => {
+        if (parseInt(p.getAttribute("data-val"), 10) === level) {
+          p.classList.add("active");
+        } else {
+          p.classList.remove("active");
+        }
+      });
+    }
+
+    if (swChargeLimit && groupChargeLimit) {
+      swChargeLimit.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          groupChargeLimit.classList.remove("disabled-control");
+        } else {
+          groupChargeLimit.classList.add("disabled-control");
+        }
+      });
+    }
+
+    if (sliderChargeLimit) {
+      sliderChargeLimit.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (labelChargeLimit) labelChargeLimit.textContent = `${val}%`;
+        syncPills(val);
+      });
+    }
+
+    presetPills.forEach((pill) => {
+      pill.addEventListener("click", () => {
+        if (swChargeLimit && !swChargeLimit.checked) return;
+        const val = parseInt(pill.getAttribute("data-val"), 10);
+        if (sliderChargeLimit) {
+          sliderChargeLimit.value = String(val);
+        }
+        if (labelChargeLimit) {
+          labelChargeLimit.textContent = `${val}%`;
+        }
+        syncPills(val);
+      });
+    });
 
     if (sliderMaxTemp) {
       sliderMaxTemp.addEventListener("input", (e) => {
@@ -133,6 +186,8 @@
         const newCfg = {
           governor_enabled: swGovernor.checked,
           screen_on_full_speed: swScreenOn.checked,
+          charge_limit_enabled: swChargeLimit ? swChargeLimit.checked : true,
+          charge_limit_level: sliderChargeLimit ? parseInt(sliderChargeLimit.value, 10) : 80,
           max_allowed_temp: parseFloat(sliderMaxTemp.value),
           recovery_temp: parseFloat(sliderRecTemp.value),
           active_interval_ms: parseInt($("sel-interval").value, 10),
@@ -159,6 +214,31 @@
   }
 
   function applyConfigToUI(cfg) {
+    if ($("sw-chargelimit")) {
+      $("sw-chargelimit").checked = cfg.charge_limit_enabled !== false;
+      if ($("group-chargelimit")) {
+        if ($("sw-chargelimit").checked) {
+          $("group-chargelimit").classList.remove("disabled-control");
+        } else {
+          $("group-chargelimit").classList.add("disabled-control");
+        }
+      }
+    }
+    if ($("slider-chargelimit")) {
+      const lvl = cfg.charge_limit_level || 80;
+      $("slider-chargelimit").value = String(lvl);
+      if ($("label-chargelimit")) {
+        $("label-chargelimit").textContent = `${lvl}%`;
+      }
+      document.querySelectorAll(".preset-pill").forEach((p) => {
+        if (parseInt(p.getAttribute("data-val"), 10) === lvl) {
+          p.classList.add("active");
+        } else {
+          p.classList.remove("active");
+        }
+      });
+    }
+
     if ($("sw-governor")) $("sw-governor").checked = cfg.governor_enabled;
     if ($("sw-screenon")) $("sw-screenon").checked = cfg.screen_on_full_speed;
     if ($("slider-maxtemp")) $("slider-maxtemp").value = cfg.max_allowed_temp;

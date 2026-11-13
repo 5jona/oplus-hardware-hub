@@ -70,6 +70,7 @@ fn main() {
     }
 
     if mode_apply_once {
+        governor.sync_charge_limit(&config);
         let (state, telemetry) = governor.evaluate_and_step(&config);
         let state_str = state.as_str();
         let temp = telemetry.battery_temp_c;
@@ -78,7 +79,13 @@ fn main() {
         let cd = telemetry.cool_down_level;
 
         println!(
-            "State: {state_str}, Temp: {temp:.1}C, Current: {curr}mA, Power: {pwr:.1}W, CoolDown: {cd}"
+            "State: {state_str}, Temp: {temp:.1}C, Current: {curr}mA, Power: {pwr:.1}W, CoolDown: {cd}, ChargeLimit: {}% ({})",
+            config.charge_limit_level,
+            if config.charge_limit_enabled {
+                "enabled"
+            } else {
+                "disabled"
+            }
         );
         return;
     }
@@ -86,9 +93,18 @@ fn main() {
     let mut active_config = config;
     let mut last_config_check = Instant::now();
 
+    // Initial synchronization of charge limit on daemon startup
+    governor.sync_charge_limit(&active_config);
+
     loop {
         if last_config_check.elapsed() >= Duration::from_secs(3) {
-            active_config = GovernorConfig::load_from_file(&config_path);
+            let reloaded = GovernorConfig::load_from_file(&config_path);
+            if reloaded.charge_limit_enabled != active_config.charge_limit_enabled
+                || reloaded.charge_limit_level != active_config.charge_limit_level
+            {
+                governor.sync_charge_limit(&reloaded);
+            }
+            active_config = reloaded;
             last_config_check = Instant::now();
         }
 

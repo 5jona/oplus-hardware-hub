@@ -321,3 +321,42 @@ select {
   font-weight: 600;
   color: var(--text-muted);
 }
+
+/* Preset Pill Group */
+.preset-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.preset-pill {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid var(--border-card);
+  color: var(--text-muted);
+  padding: 6px 0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.preset-pill:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+}
+
+.preset-pill.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.disabled-control {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}

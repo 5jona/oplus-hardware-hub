@@ -162,4 +162,62 @@ impl BatterySubsystem {
     pub fn is_supported(&self) -> bool {
         Path::new(self.path_cool_down).exists()
     }
+
+    fn run_settings_cmd(args: &[&str]) -> Option<String> {
+        let bin = if Path::new("/system/bin/cmd").exists() {
+            "/system/bin/cmd"
+        } else {
+            "cmd"
+        };
+        let mut full_args = vec!["settings"];
+        full_args.extend_from_slice(args);
+        let out = std::process::Command::new(bin)
+            .args(full_args)
+            .output()
+            .ok()?;
+        if out.status.success() {
+            Some(String::from_utf8_lossy(&out.stdout).trim().to_string())
+        } else {
+            None
+        }
+    }
+
+    /// Queries the current system charge limit settings from ColorOS SettingsProvider.
+    #[must_use]
+    pub fn query_system_charge_limit(&self) -> Option<(bool, u32)> {
+        let sw_str =
+            Self::run_settings_cmd(&["get", "system", "regular_charge_protection_switch_state"])?;
+        let lvl_str = Self::run_settings_cmd(&[
+            "get",
+            "system",
+            "regular_charge_protection_open_power_level",
+        ])?;
+
+        if sw_str == "null" || lvl_str == "null" {
+            return None;
+        }
+
+        let enabled = sw_str == "1";
+        let level = lvl_str.parse::<u32>().ok()?;
+        Some((enabled, level))
+    }
+
+    /// Enforces the system charge limit settings in ColorOS SettingsProvider.
+    pub fn apply_system_charge_limit(&self, enabled: bool, level: u32) {
+        let sw_val = if enabled { "1" } else { "0" };
+        let lvl_val = level.to_string();
+
+        let _ = Self::run_settings_cmd(&[
+            "put",
+            "system",
+            "regular_charge_protection_switch_state",
+            sw_val,
+        ]);
+        let _ = Self::run_settings_cmd(&[
+            "put",
+            "system",
+            "regular_charge_protection_open_power_level",
+            &lvl_val,
+        ]);
+    }
 }

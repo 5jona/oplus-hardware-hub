@@ -12,45 +12,80 @@
     max_allowed_temp: 42.0,
     recovery_temp: 38.0,
     screen_on_full_speed: true,
+    charge_limit_enabled: true,
+    charge_limit_level: 80,
     active_interval_ms: 500,
     idle_interval_ms: 3000,
   };
 
-  async function loadConfig() {
-    const res = await window.OHH.Bridge.ksuExec(`cat "${CONFIG_PATH}" 2>/dev/null`);
-    if (res.errno !== 0 || !res.stdout.trim()) {
-      return { ...DEFAULT_CONFIG };
+  async function fetchSystemChargeLimit() {
+    const swRes = await window.OHH.Bridge.ksuExec(
+      "cmd settings get system regular_charge_protection_switch_state 2>/dev/null || settings get system regular_charge_protection_switch_state 2>/dev/null"
+    );
+    const lvlRes = await window.OHH.Bridge.ksuExec(
+      "cmd settings get system regular_charge_protection_open_power_level 2>/dev/null || settings get system regular_charge_protection_open_power_level 2>/dev/null"
+    );
+
+    const result = {};
+    if (swRes && swRes.errno === 0 && swRes.stdout.trim() && swRes.stdout.trim() !== "null") {
+      result.charge_limit_enabled = swRes.stdout.trim() === "1";
     }
-
-    const cfg = { ...DEFAULT_CONFIG };
-    for (const line of res.stdout.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-
-      const idx = trimmed.indexOf("=");
-      if (idx === -1) continue;
-
-      const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim();
-
-      if (key === "governor_enabled") {
-        cfg.governor_enabled = val === "1" || val.toLowerCase() === "true";
-      } else if (key === "max_allowed_temp") {
-        const num = parseFloat(val);
-        if (!isNaN(num)) cfg.max_allowed_temp = num;
-      } else if (key === "recovery_temp") {
-        const num = parseFloat(val);
-        if (!isNaN(num)) cfg.recovery_temp = num;
-      } else if (key === "screen_on_full_speed") {
-        cfg.screen_on_full_speed = val === "1" || val.toLowerCase() === "true";
-      } else if (key === "active_interval_ms") {
-        const num = parseInt(val, 10);
-        if (!isNaN(num)) cfg.active_interval_ms = num;
-      } else if (key === "idle_interval_ms") {
-        const num = parseInt(val, 10);
-        if (!isNaN(num)) cfg.idle_interval_ms = num;
+    if (lvlRes && lvlRes.errno === 0 && lvlRes.stdout.trim() && lvlRes.stdout.trim() !== "null") {
+      const lvl = parseInt(lvlRes.stdout.trim(), 10);
+      if (!isNaN(lvl) && lvl >= 80 && lvl <= 100) {
+        result.charge_limit_level = lvl;
       }
     }
+    return result;
+  }
+
+  async function loadConfig() {
+    const res = await window.OHH.Bridge.ksuExec(`cat "${CONFIG_PATH}" 2>/dev/null`);
+    const cfg = { ...DEFAULT_CONFIG };
+    if (res.errno === 0 && res.stdout.trim()) {
+      for (const line of res.stdout.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+
+        const idx = trimmed.indexOf("=");
+        if (idx === -1) continue;
+
+        const key = trimmed.slice(0, idx).trim();
+        const val = trimmed.slice(idx + 1).trim();
+
+        if (key === "governor_enabled") {
+          cfg.governor_enabled = val === "1" || val.toLowerCase() === "true";
+        } else if (key === "max_allowed_temp") {
+          const num = parseFloat(val);
+          if (!isNaN(num)) cfg.max_allowed_temp = num;
+        } else if (key === "recovery_temp") {
+          const num = parseFloat(val);
+          if (!isNaN(num)) cfg.recovery_temp = num;
+        } else if (key === "screen_on_full_speed") {
+          cfg.screen_on_full_speed = val === "1" || val.toLowerCase() === "true";
+        } else if (key === "charge_limit_enabled") {
+          cfg.charge_limit_enabled = val === "1" || val.toLowerCase() === "true";
+        } else if (key === "charge_limit_level") {
+          const num = parseInt(val, 10);
+          if (!isNaN(num) && num >= 80 && num <= 100) cfg.charge_limit_level = num;
+        } else if (key === "active_interval_ms") {
+          const num = parseInt(val, 10);
+          if (!isNaN(num)) cfg.active_interval_ms = num;
+        } else if (key === "idle_interval_ms") {
+          const num = parseInt(val, 10);
+          if (!isNaN(num)) cfg.idle_interval_ms = num;
+        }
+      }
+    }
+
+    // Prefer live system setting if available
+    try {
+      const sysLimit = await fetchSystemChargeLimit();
+      Object.assign(cfg, sysLimit);
+    } catch (e) {
+      console.warn("[Config] Could not fetch system charge limit:", e);
+    }
+
     return cfg;
   }
 
@@ -61,12 +96,22 @@
       `max_allowed_temp=${cfg.max_allowed_temp.toFixed(1)}`,
       `recovery_temp=${cfg.recovery_temp.toFixed(1)}`,
       `screen_on_full_speed=${cfg.screen_on_full_speed ? 1 : 0}`,
+      `charge_limit_enabled=${cfg.charge_limit_enabled ? 1 : 0}`,
+      `charge_limit_level=${cfg.charge_limit_level}`,
       `active_interval_ms=${cfg.active_interval_ms}`,
       `idle_interval_ms=${cfg.idle_interval_ms}`,
     ].join("\n");
 
-    const cmd = `cat <<'EOF' > "${CONFIG_PATH}"\n${content}\nEOF\nchmod 0644 "${CONFIG_PATH}"`;
-    return await window.OHH.Bridge.ksuExec(cmd);
+    const cmdFile = `cat <<'EOF' > "${CONFIG_PATH}"\n${content}\nEOF\nchmod 0644 "${CONFIG_PATH}"`;
+    const resFile = await window.OHH.Bridge.ksuExec(cmdFile);
+
+    // Apply directly to system settings
+    const swVal = cfg.charge_limit_enabled ? 1 : 0;
+    const lvlVal = cfg.charge_limit_level;
+    const cmdSettings = `cmd settings put system regular_charge_protection_switch_state ${swVal} 2>/dev/null || settings put system regular_charge_protection_switch_state ${swVal} 2>/dev/null; cmd settings put system regular_charge_protection_open_power_level ${lvlVal} 2>/dev/null || settings put system regular_charge_protection_open_power_level ${lvlVal} 2>/dev/null`;
+    await window.OHH.Bridge.ksuExec(cmdSettings);
+
+    return resFile;
   }
 
   async function queryStatus() {

@@ -1,6 +1,6 @@
 # OPlus Hardware Hub
 
-A modular KernelSU extension for OnePlus devices running ColorOS or OxygenOS. Manages fast charging thermal throttling to sustain peak wattage under cooling, featuring an automatic thermal tripwire and real-time KernelSU WebUI telemetry dashboard.
+A modular KernelSU extension for OnePlus devices running ColorOS. Manages fast charging thermal throttling to sustain peak wattage under cooling, featuring an automatic thermal tripwire and real-time KernelSU WebUI telemetry dashboard.
 
 ## Architecture
 
@@ -8,7 +8,13 @@ A modular KernelSU extension for OnePlus devices running ColorOS or OxygenOS. Ma
   - `ohh-core`: Platform-agnostic telemetry reader, MMS `cool_down` interface, hysteresis state machine, and error handling.
   - `ohh`: Daemon supervisor and CLI status querying binary.
 - **`webroot/`**: Responsive telemetry dashboard embedded in KernelSU Manager via `window.ksu.exec`.
-- **`config.conf`**: Configurable temperature ceilings, recovery hysteresis points, and screen-on policy.
+- **`config.conf`**: Configurable temperature ceilings, recovery hysteresis points, screen-on policy, and ColorOS built-in custom charge limit controls.
+
+## Key Features
+
+- **Thermal Fast Charging Governor**: Sustains peak charging wattage by managing MMS cool_down gears, with automatic safety tripwire and hysteresis recovery.
+- **ColorOS Custom Charge Limit Integration**: Directly integrates system `regular_charge_protection` switch and cutoff level (80% - 100%, 5% steps) with two-way synchronization between WebUI, `config.conf`, and ColorOS settings.
+- **KernelSU WebUI Telemetry**: Real-time delivered power wattage, dual-cell voltage, battery temperature, and quick preset controls.
 
 ## Build & Installation
 
@@ -26,6 +32,3 @@ The output package will be generated at `out/oplus-hardware-hub.zip`.
 ```bash
 ./reload.sh 10.0.0.12:5555
 ```
-
-## License
-MIT OR Apache-2.0

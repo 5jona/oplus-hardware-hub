@@ -60,6 +60,8 @@
             max_allowed_temp: 42.0,
             recovery_temp: 38.0,
             screen_on_full_speed: true,
+            charge_limit_enabled: true,
+            charge_limit_level: 80,
             device_max_power_w: 67,
             adapter_max_power_w: 100,
             consecutive_overrides: 142

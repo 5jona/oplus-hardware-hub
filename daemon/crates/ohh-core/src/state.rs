@@ -104,6 +104,12 @@ impl ChargeGovernor {
         self.current_state
     }
 
+    /// Synchronizes the charge limit settings with ColorOS system settings.
+    pub fn sync_charge_limit(&self, config: &GovernorConfig) {
+        self.battery
+            .apply_system_charge_limit(config.charge_limit_enabled, config.charge_limit_level);
+    }
+
     /// Generates structured status JSON string for external status queries.
     pub fn status_json(&mut self, config: &GovernorConfig) -> String {
         let (state, telemetry) = self.evaluate_and_step(config);
@@ -120,6 +126,8 @@ impl ChargeGovernor {
         let max_temp = config.max_allowed_temp;
         let rec_temp = config.recovery_temp;
         let screen_on = config.screen_on_full_speed;
+        let chg_lim_enabled = config.charge_limit_enabled;
+        let chg_lim_level = config.charge_limit_level;
         let dev_pwr = telemetry.device_max_power_w;
         let adp_pwr = telemetry.adapter_max_power_w;
         let overrides = self.consecutive_overrides;
@@ -139,6 +147,8 @@ impl ChargeGovernor {
               \"max_allowed_temp\": {max_temp:.1},\n  \
               \"recovery_temp\": {rec_temp:.1},\n  \
               \"screen_on_full_speed\": {screen_on},\n  \
+              \"charge_limit_enabled\": {chg_lim_enabled},\n  \
+              \"charge_limit_level\": {chg_lim_level},\n  \
               \"device_max_power_w\": {dev_pwr},\n  \
               \"adapter_max_power_w\": {adp_pwr},\n  \
               \"consecutive_overrides\": {overrides}\n\
@@ -226,5 +236,18 @@ mod tests {
             governor.step_with_telemetry(&config, &telemetry),
             GovernorState::Disabled
         );
+    }
+
+    #[test]
+    fn test_status_json_charge_limit() {
+        let mut governor = ChargeGovernor::new();
+        let config = GovernorConfig {
+            charge_limit_enabled: true,
+            charge_limit_level: 85,
+            ..Default::default()
+        };
+        let json = governor.status_json(&config);
+        assert!(json.contains("\"charge_limit_enabled\": true"));
+        assert!(json.contains("\"charge_limit_level\": 85"));
     }
 }

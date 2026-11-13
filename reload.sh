@@ -39,7 +39,7 @@ adb -s "${TARGET_SERIAL}" push "${SCRIPT_DIR}/webroot" "/data/local/tmp/"
 
 adb -s "${TARGET_SERIAL}" shell "su -c '
     cp /data/local/tmp/module.prop ${REMOTE_MOD_DIR}/module.prop
-    [ -f ${REMOTE_MOD_DIR}/config.conf ] || cp /data/local/tmp/config.conf ${REMOTE_MOD_DIR}/config.conf
+    cp /data/local/tmp/config.conf ${REMOTE_MOD_DIR}/config.conf
     cp /data/local/tmp/service.sh ${REMOTE_MOD_DIR}/service.sh
     cp /data/local/tmp/post-fs-data.sh ${REMOTE_MOD_DIR}/post-fs-data.sh
     cp /data/local/tmp/customize.sh ${REMOTE_MOD_DIR}/customize.sh

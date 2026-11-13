@@ -12,6 +12,10 @@ pub struct GovernorConfig {
     pub recovery_temp: f32,
     /// Whether to maintain unconstrained charging while the display is active.
     pub screen_on_full_speed: bool,
+    /// ColorOS system charge limit enabled state (regular_charge_protection_switch_state).
+    pub charge_limit_enabled: bool,
+    /// ColorOS system charge limit cutoff percentage (regular_charge_protection_open_power_level, 80-100%).
+    pub charge_limit_level: u32,
     /// Polling and enforcement period in milliseconds when charging is detected.
     pub active_interval_ms: u64,
     /// Polling period in milliseconds when the device is discharging or idle.
@@ -27,6 +31,8 @@ impl Default for GovernorConfig {
             max_allowed_temp: 42.0,
             recovery_temp: 38.0,
             screen_on_full_speed: true,
+            charge_limit_enabled: true,
+            charge_limit_level: 80,
             active_interval_ms: 500,
             idle_interval_ms: 3000,
             config_path: PathBuf::from("/data/adb/modules/oplus_hardware_hub/config.conf"),
@@ -89,6 +95,16 @@ impl GovernorConfig {
                 "screen_on_full_speed" => {
                     config.screen_on_full_speed = Self::parse_bool(v, config.screen_on_full_speed);
                 }
+                "charge_limit_enabled" => {
+                    config.charge_limit_enabled = Self::parse_bool(v, config.charge_limit_enabled);
+                }
+                "charge_limit_level" => {
+                    if let Ok(lvl) = v.parse::<u32>()
+                        && (80..=100).contains(&lvl)
+                    {
+                        config.charge_limit_level = lvl;
+                    }
+                }
                 "active_interval_ms" => {
                     if let Ok(ms) = v.parse::<u64>()
                         && (100..=10000).contains(&ms)
@@ -135,6 +151,8 @@ mod tests {
             max_allowed_temp=42.5
             recovery_temp=39.0
             screen_on_full_speed=0
+            charge_limit_enabled=1
+            charge_limit_level=85
             active_interval_ms=600
             idle_interval_ms=5000
         "#;
@@ -143,6 +161,8 @@ mod tests {
         assert!((config.max_allowed_temp - 42.5).abs() < f32::EPSILON);
         assert!((config.recovery_temp - 39.0).abs() < f32::EPSILON);
         assert!(!config.screen_on_full_speed);
+        assert!(config.charge_limit_enabled);
+        assert_eq!(config.charge_limit_level, 85);
         assert_eq!(config.active_interval_ms, 600);
         assert_eq!(config.idle_interval_ms, 5000);
     }
@@ -156,5 +176,23 @@ mod tests {
         let config = GovernorConfig::parse_str(text);
         assert!((config.max_allowed_temp - 35.0).abs() < f32::EPSILON);
         assert!((config.recovery_temp - 33.0).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn test_charge_limit_bounds() {
+        // Out of range (75 and 105) should keep default (80)
+        let text_low = "charge_limit_level=75\ncharge_limit_enabled=0";
+        let cfg_low = GovernorConfig::parse_str(text_low);
+        assert!(!cfg_low.charge_limit_enabled);
+        assert_eq!(cfg_low.charge_limit_level, 80);
+
+        let text_high = "charge_limit_level=105";
+        let cfg_high = GovernorConfig::parse_str(text_high);
+        assert_eq!(cfg_high.charge_limit_level, 80);
+
+        // In range (90)
+        let text_valid = "charge_limit_level=90";
+        let cfg_valid = GovernorConfig::parse_str(text_valid);
+        assert_eq!(cfg_valid.charge_limit_level, 90);
     }
 }
